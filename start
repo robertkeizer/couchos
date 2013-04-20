@@ -2,6 +2,7 @@
 
 util	= require "util"
 fs	= require "fs"
+couchdb	= require "then-couchdb"
 
 fs.exists "config.json", ( config_exists ) ->
 
@@ -20,11 +21,16 @@ fs.exists "config.json", ( config_exists ) ->
 
 	fs.readFile "config.json", ( err, data ) ->
 		if err
-			return config_fail( err )
+			return config_fail err
 		try
 			configuration	= JSON.parse( data )
+
+			if not configuration["db_uri"]?
+				return config_fail "No database URI specified in configuration file."
 		catch err
 			return config_fail( err )
-		
-		# We now have the configuration..
-		util.log util.inspect configuration
+
+		# Make the database connection.
+		db	= couchdb.createClient configuration["db_uri"]
+
+		util.log util.inspect db
