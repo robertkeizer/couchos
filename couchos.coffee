@@ -1,8 +1,7 @@
 util	= require "util"
 http	= require "http"
-events	= require "events"
 
-class CouchConnection extends events.EventEmitter
+class CouchConnection
 	constructor: ( @base_url, @database ) ->
 		return 
 
@@ -20,6 +19,5 @@ class CouchConnection extends events.EventEmitter
 	list_databases: ( cb ) ->
 		@_make_request "/_all_dbs", cb
 
-	
 
 module.exports.CouchConnection = CouchConnection
