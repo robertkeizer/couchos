@@ -9,28 +9,22 @@ fail = ( msg ) ->
 
 fs.exists "config.json", ( config_exists ) ->
 
-	# Helper config fail function.
-	config_fail = ( msg ) ->
-		_msg	= "Unable to load configuration file."
-		if msg
-			return fail _msg + " ( " + msg + " )"
-		else
-			return fail _msg
-
 	if not config_exists
-		return config_fail( )
+		return fail "Couldn't find the config file."
 
 	fs.readFile "config.json", ( err, data ) ->
 		if err
-			return config_fail err
+			return fail err
 		try
 			configuration	= JSON.parse( data )
 		catch err
-			return config_fail( err )
+			return fail err
 
-		couch_connection	= new couchos.CouchConnection configuration["db_url_base"]
-		couch_connection.list_databases ( err, dbs ) ->
+		couch_connection	= new couchos.CouchConnection configuration["db_url"]
+		
+		couch_connection.get configuration["shell"], ( err, res ) ->
+
 			if err
-				return fail "Unable to list databases.. " + err
+				return fail "Unable to find the shell '" + configuration["shell"] + "': " + err
 			
-			util.log util.inspect dbs
+			util.log util.inspect res
