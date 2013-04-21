@@ -12,13 +12,13 @@ class CouchConnection extends events.EventEmitter
 			res.on "data", ( chunk ) ->
 				_response = _response + chunk
 			res.on "end", ( ) ->
-				cb null, _response
+				cb null, JSON.parse _response
 			res.on "error", ( err ) ->
 				cb err
-		_req.close
+		_req.end( )
 
 	list_databases: ( cb ) ->
-		@_make_requests cb
+		@_make_request "/_all_dbs", cb
 
 	
 

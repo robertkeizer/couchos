@@ -2,17 +2,20 @@ util	= require "util"
 fs	= require "fs"
 couchos	= require "./couchos"
 
+fail = ( msg ) ->
+	if msg
+		util.log msg
+	process.exit 1
+
 fs.exists "config.json", ( config_exists ) ->
 
 	# Helper config fail function.
 	config_fail = ( msg ) ->
 		_msg	= "Unable to load configuration file."
 		if msg
-			util.log _msg + " ( " + msg + " )"
+			return fail _msg + " ( " + msg + " )"
 		else
-			util.log _msg
-
-		process.exit 1
+			return fail _msg
 
 	if not config_exists
 		return config_fail( )
@@ -26,4 +29,8 @@ fs.exists "config.json", ( config_exists ) ->
 			return config_fail( err )
 
 		couch_connection	= new couchos.CouchConnection configuration["db_url_base"]
-		util.log couch_connection.list_databases( )
+		couch_connection.list_databases ( err, dbs ) ->
+			if err
+				return fail "Unable to list databases.. " + err
+			
+			util.log util.inspect dbs
