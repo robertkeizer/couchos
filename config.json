@@ -1,1 +1,7 @@
-{ "name": "thinkpad-b3", "db_uri": "http://127.0.0.1:5984/couchos" }
+{ "name": "thinkpad-b3",
+	"db":
+	{ "host": "127.0.0.1",
+		"port": 5984,
+		"db": "couchos"
+	},
+"shell": "/bin/tinysh" }

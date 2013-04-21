@@ -1,8 +1,6 @@
-#!/usr/bin/env coffee
-
 util	= require "util"
 fs	= require "fs"
-couchdb	= require "then-couchdb"
+http	= require "http"
 
 fs.exists "config.json", ( config_exists ) ->
 
@@ -24,13 +22,16 @@ fs.exists "config.json", ( config_exists ) ->
 			return config_fail err
 		try
 			configuration	= JSON.parse( data )
-
-			if not configuration["db_uri"]?
-				return config_fail "No database URI specified in configuration file."
 		catch err
 			return config_fail( err )
 
-		# Make the database connection.
-		db	= couchdb.createClient configuration["db_uri"]
+		util.log util.inspect configuration
+		# We now have the configuration variable to work with..
+		req = http.request { "hostname": configuration["db"]["host"], "port": configuration["db"]["port"], "method": "GET", "path": "/_all_dbs" }, ( res ) ->
+			_response = ""
+			res.on "data", ( chunk ) ->
+				_response = _response + chunk
+			res.on "end", ( ) ->
+				util.log util.inspect _response
 
-		util.log util.inspect db
+		req.end( )
