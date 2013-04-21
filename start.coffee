@@ -1,6 +1,6 @@
 util	= require "util"
 fs	= require "fs"
-http	= require "http"
+couchos	= require "./couchos"
 
 fs.exists "config.json", ( config_exists ) ->
 
@@ -25,13 +25,5 @@ fs.exists "config.json", ( config_exists ) ->
 		catch err
 			return config_fail( err )
 
-		util.log util.inspect configuration
-		# We now have the configuration variable to work with..
-		req = http.request "http://" + configuration["db"]["host"] + ":" + configuration["db"]["port"] + "/_all_dbs", ( res ) ->
-			_response = ""
-			res.on "data", ( chunk ) ->
-				_response = _response + chunk
-			res.on "end", ( ) ->
-				util.log util.inspect _response
-
-		req.end( )
+		couch_connection	= new couchos.CouchConnection configuration["db_url_base"]
+		util.log couch_connection.list_databases( )
