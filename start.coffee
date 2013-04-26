@@ -1,6 +1,6 @@
 util	= require "util"
 fs	= require "fs"
-couchos	= require "./couchos"
+utils	= require "libs/utils"
 
 fail = ( msg ) ->
 	if msg
@@ -20,7 +20,7 @@ fs.exists "config.json", ( config_exists ) ->
 		catch err
 			return fail err
 
-		couch_connection	= new couchos.CouchConnection configuration["db_url"]
+		couch_connection	= new utils.CouchConnection configuration["db_url"]
 		
 		couch_connection.get configuration["shell"], ( err, res ) ->
 
