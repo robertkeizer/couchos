@@ -1,30 +1,38 @@
+utils	= require "./utils"
 util	= require "util"
 fs	= require "fs"
-utils	= require "libs/utils"
+async	= require "async"
 
-fail = ( msg ) ->
-	if msg
-		util.log msg
-	process.exit 1
+config_file	= "config.json"
 
-fs.exists "config.json", ( config_exists ) ->
-
-	if not config_exists
-		return fail "Couldn't find the config file."
-
-	fs.readFile "config.json", ( err, data ) ->
-		if err
-			return fail err
-		try
-			configuration	= JSON.parse( data )
-		catch err
-			return fail err
-
-		couch_connection	= new utils.CouchConnection configuration["db_url"]
+async.waterfall [ 
+	( cb ) ->
+		fs.exists config_file, ( exists ) ->
+			if not exists
+				return cb "Couldn't find config file."
+			return cb( null, exists )
+	, ( exists, cb ) ->
+		fs.readFile config_file, ( err, data ) ->
+			if err
+				return cb err
+			return cb( null, JSON.parse( data ) )
+	, ( config, cb ) ->
 		
-		couch_connection.get configuration["shell"], ( err, res ) ->
+		# Make a new couch connection.
+		couch_connection	= new utils.CouchConnection config.db_url
+		
+		# Bootstrap into a startup program
+		couch_connection.get config.startup, ( err, res ) ->
 
 			if err
-				return fail "Unable to find the shell '" + configuration["shell"] + "': " + err
-			
-			util.log util.inspect res
+				return cb err
+
+			utils.debug res
+			return cb( ) 
+	] , ( err, res ) ->
+		if err
+			utils.debug "Unable to startup."
+			utils.debug err
+			utils.fail err
+
+		utils.debug "got here"

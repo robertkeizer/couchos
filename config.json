@@ -1,1 +1,1 @@
-{ "name": "thinkpad-b3", "db_url": "http://127.0.0.1:5984/couchos", "shell": "tinysh" }
+{ "name": "thinkpad-b3", "db_url": "http://127.0.0.1:5984/couchos", "startup": "startup" }

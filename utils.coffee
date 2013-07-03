@@ -16,6 +16,21 @@ class CouchConnection
 		_req.end( )
 	
 	get: ( id, cb ) ->
-		@_make_request "/" + id, cb
+		@_make_request "/" + id, ( err, data ) ->
+			if err
+				return cb err
+
+			if data["error"]?
+				return cb data
+	
+			return cb null, data
 
 module.exports.CouchConnection = CouchConnection
+
+# Simple fatal error message.
+module.exports.fail = ( msg ) ->
+	util.log msg
+	process.exit 1
+
+module.exports.debug = ( _o ) ->
+	util.log( util.inspect( _o ) )
