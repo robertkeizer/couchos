@@ -1,6 +1,7 @@
 utils	= require "./utils"
 util	= require "util"
 fs	= require "fs"
+vm	= require "vm"
 async	= require "async"
 
 config_file	= "config.json"
@@ -27,12 +28,23 @@ async.waterfall [
 			if err
 				return cb err
 
-			utils.debug res
-			return cb( ) 
-	] , ( err, res ) ->
+			return cb null, config, res
+	] , ( err, config, startup_doc ) ->
 		if err
 			utils.debug "Unable to startup."
 			utils.debug err
-			utils.fail err
+			utils.fail "Dying."
 
-		utils.debug "got here"
+		# Generate a context that we will run the code in..
+		vm_context	= vm.createContext { "require": require, "config": config, "utils": utils, "me": startup_doc }
+
+		# Run the code..
+		try
+			result = vm.runInContext startup_doc.code, vm_context
+		catch err
+			utils.debug "Got an error when executing the startup"
+			utils.debug err
+			utils.fail "Exiting."
+		
+		utils.debug "Dumping the result.."
+		utils.debug result
